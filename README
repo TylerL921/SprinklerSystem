@@ -1,0 +1,11 @@
+Sprinkler System Project
+
+Goal:
+The goal of this project is to gather weather data in the area to adjust our sprinklers accordingly.
+We achive this by gathering weather data from the OpenMetro API, storing relevant information into our own database
+and sending instructions to our sprinkler system.
+
+
+References:
+https://open-meteo.com/
+https://www.geeksforgeeks.org/python-postgresql-update-table/
