@@ -13,6 +13,7 @@ latLong = 44.099, -79.133 # Latitude and Longitude
 hourlyD = ["temperature_2m", "precipitation_probability", "precipitation", "relative_humidity_2m"] # Data you want for hourly table
 dailyD = ["temperature_2m_min", "temperature_2m_max", "sunshine_duration", "daylight_duration", "precipitation_sum"] # Data you want for daily table
 timezone = "America/New_York"
+days = 3
 
 # Postgres Information
 db = "SprinklerWeatherData" # Name of Database
@@ -34,7 +35,7 @@ params = {
     "daily": dailyD,
 	"hourly": hourlyD,
     "timezone": timezone,
-    "forecast_days": 3
+    "forecast_days": days
 }
 
 # Gather the data from open meteo
@@ -68,8 +69,7 @@ hourly_long = hourly_dataframe.melt(id_vars="time", var_name="tag", value_name="
 
 # Keep only future rows (i.e., where time > now)
 hourly_long = hourly_long[hourly_long["time"] >= now].reset_index(drop=True)
-print(hourly_long)
-
+# print(hourly_long)
 
 
 
@@ -92,8 +92,7 @@ for i in range(len(dailyD)):
 daily_dataframe = pd.DataFrame(data = dataD)
 daily_dataframe["time"] = daily_dataframe["time"].dt.tz_convert(timezone)
 daily_long = daily_dataframe.melt(id_vars="time", var_name="tag", value_name="value")
-print(daily_long)
-
+# print(daily_long)
 
 
 # PostGres
@@ -104,10 +103,13 @@ cur = conn.cursor()
 # Delete the predicted values in the tables
 def clearFuture():
 	# Delete data to be re-written
-	cur.execute("DELETE FROM \"dailyFloat\" WHERE time >= date_trunc('day', now());")
+	cur.execute("DELETE FROM \"Daily\" WHERE time >= date_trunc('day', now());")
 	conn.commit()
 
-	cur.execute("DELETE FROM \"hourlyFloat\" WHERE time >= date_trunc('hour', now());")
+	cur.execute("DELETE FROM \"SprinklerLogs\" WHERE time >= date_trunc('day', now());")
+	conn.commit()
+
+	cur.execute("DELETE FROM \"Hourly\" WHERE time >= date_trunc('hour', now());")
 	conn.commit()
      
 # Adds Dataframe to Postgres table
@@ -128,8 +130,21 @@ def updateTable(table, df):
 		conn.rollback()
 		print("Error inserting data:", e)
 
+# Updates Sprinkler table with default value.
+def updateSprinkler():
+	cur.execute("INSERT INTO \"SprinklerLogs\" (time, precipitation) SELECT time, value AS precipitation FROM \"Daily\" WHERE tag = 'precipitation_sum' and time >= date_trunc('day', now());")
+	conn.commit()
+
+# Updates Sprinkler table with specified runtime.
+def logSprinkler(num):
+	cur.execute(f"UPDATE \"SprinklerLogs\" SET runtime = {num} WHERE time::date = CURRENT_DATE;")
+	conn.commit()
+
 # Update Tables
 clearFuture()
-updateTable("\"dailyFloat\"", daily_long)
-updateTable("\"hourlyFloat\"", hourly_long)
+updateTable("\"Daily\"", daily_long)
+updateTable("\"Hourly\"", hourly_long)
+updateSprinkler()
 
+# Close Connection
+conn.close

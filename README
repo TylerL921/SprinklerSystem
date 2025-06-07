@@ -5,9 +5,19 @@ The goal of this project is to gather weather data in the area to adjust our spr
 We achive this by gathering weather data from the OpenMeteo API, storing relevant information into our own database
 and sending instructions to our sprinkler system.
 
+Dev Notes:
+The current system is calibrated to our home's specific needs. Future implementations will be more modular.
+
+
+Database Breakdown:
+
+
 Logs:
 April 11 2025: 
 The data gathering script can now gather weather data from OpenMeteo, format it for Postgres Database, and store information.
+
+June 7 2025:
+Added new table into database. Edited code accomodate for the new table. Started to work on being able to log how long the sprinkler system is on.
 
 
 References:
