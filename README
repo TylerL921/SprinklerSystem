@@ -11,6 +11,20 @@ The current system is calibrated to our home's specific needs. Future implementa
 
 Database Breakdown:
 
+Daily Table:
+time - co-primary key - timestamp - (timestamp with time zone)
+tag - co-primary key - what is being measured - (text)
+value - value of tag being measured - (double precision)
+
+Hourly Table:
+time - co-primary key - timestamp - (timestamp with time zone)
+tag - co-primary key - what is being measured - (text)
+value - value of tag being measured - (double precision)
+
+SprinklerLogs Table:
+time - primary key - timestamp - (timestamp with timezone)
+precipitation - estimated precipitation for the day - (double precision)
+runtime - how long was the sprinkler on in minuites - (integer)
 
 Logs:
 April 11 2025: 
